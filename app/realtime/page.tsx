@@ -18,9 +18,7 @@ export default function RealtimePage() {
   const [lastPong, setLastPong] = useState<PongPayload | null>(null);
 
   useEffect(() => {
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/realtime`, {
-      transports: ["websocket"],
-    });
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/realtime`);
 
     socketRef.current = socket;
 
@@ -65,7 +63,7 @@ export default function RealtimePage() {
 
           <div className="mt-1">
             <span className="font-medium">Hello:</span>{" "}
-            {hello ? hello : "(henüz gelmedi)"}
+            {hello ? hello : "(didn't come yet)"}
           </div>
         </div>
 
@@ -80,7 +78,7 @@ export default function RealtimePage() {
         <div className="mt-4">
           <div className="text-sm font-medium">Last pong:</div>
           <pre className="mt-2 overflow-auto rounded-xl bg-zinc-100 p-3 text-xs">
-            {lastPong ? JSON.stringify(lastPong, null, 2) : "Yok"}
+            {lastPong ? JSON.stringify(lastPong, null, 2) : "None"}
           </pre>
         </div>
       </div>
