@@ -1,0 +1,155 @@
+// app/(home)/page.tsx
+import Link from "next/link";
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
+      {/* subtle background glow */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/2 h-130 w-130 -translate-x-1/2 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute top-48 -right-45 h-105 w-105 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-55 -left-55 h-130 w-130 rounded-full bg-white/5 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex max-w-6xl flex-col px-6 py-14 md:py-20">
+        {/* Badge */}
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          LIVE • WebSocket Streaming
+        </div>
+
+        {/* Hero */}
+        <div className="mt-10 grid gap-10 md:mt-12 md:grid-cols-2 md:items-center">
+          <div>
+            <h1 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
+              Statistics,
+              <span className="text-white/90"> connects to live data.</span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 md:text-lg">
+              This application receives metrics produced by your{" "}
+              <span className="text-zinc-100">own API services</span> via{" "}
+              <span className="text-zinc-100">WebSocket</span> and updates the{" "}
+              <span className="text-zinc-100">line chart</span> in real time.
+              Track trends without refreshing the page.
+            </p>
+
+            {/* CTAs */}
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/chart"
+                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
+              >
+                Go to Live Chart
+              </Link>
+
+              <Link
+                href="/test"
+                className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
+              >
+                Test Connection
+              </Link>
+            </div>
+
+            {/* tiny info line */}
+            <div className="mt-6 text-xs text-zinc-400">
+              Latency-aware • Stream-first • Dashboard-ready
+            </div>
+          </div>
+
+          {/* Right side “preview” card */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold text-zinc-100">
+                Live Feed Overview
+              </div>
+              <div className="rounded-full border border-white/10 bg-black/30 px-2 py-1 text-[11px] text-zinc-300">
+                ws:// connected
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                <div className="text-xs text-zinc-400">Current Rate</div>
+                <div className="mt-1 text-2xl font-semibold">~ 12.4/s</div>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                <div className="text-xs text-zinc-400">Last Update</div>
+                <div className="mt-1 text-sm font-medium text-zinc-200">
+                  just now
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                <div className="text-xs text-zinc-400">Next Step</div>
+                <div className="mt-1 text-sm text-zinc-200">
+                  Open the chart page to start plotting live data.
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-white/10 bg-black/30 p-4">
+              <div className="text-xs font-medium text-zinc-300">
+                How it works
+              </div>
+              <ol className="mt-3 space-y-2 text-sm text-zinc-300">
+                <li className="flex gap-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/10 text-xs text-zinc-100">
+                    1
+                  </span>
+                  Service produces metrics (interval / event-driven).
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/10 text-xs text-zinc-100">
+                    2
+                  </span>
+                  Gateway (WebSocket) publishes to clients.
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/10 text-xs text-zinc-100">
+                    3
+                  </span>
+                  UI listens via socket.on(...) and updates the chart.
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature cards */}
+        <section className="mt-12 grid gap-4 md:mt-16 md:grid-cols-3">
+          <FeatureCard
+            title="Real-time Updates"
+            desc="Push-based updates with WebSocket. No page refresh needed."
+          />
+          <FeatureCard
+            title="Trend-focused Visualization"
+            desc="Catch trends, spikes, and patterns using line charts."
+          />
+          <FeatureCard
+            title="Service-aligned Architecture"
+            desc="Data is produced in the backend; UI only subscribes and renders."
+          />
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-14 border-t border-white/10 pt-6 text-xs text-zinc-500">
+          © {new Date().getFullYear()} Statistics • Built for streaming metrics.
+        </footer>
+      </div>
+    </main>
+  );
+}
+
+function FeatureCard({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+      <div className="text-sm font-semibold text-zinc-100">{title}</div>
+      <p className="mt-2 text-sm leading-relaxed text-zinc-300">{desc}</p>
+    </div>
+  );
+}

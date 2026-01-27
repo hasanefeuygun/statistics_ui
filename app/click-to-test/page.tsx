@@ -22,13 +22,13 @@ export default function Page() {
         duration-200
         cursor-pointer
       "
-        onClick={() => router.push("/realtime")}
+        onClick={() => router.push("/test")}
       >
         <Power size={36} />
       </button>
 
       <p className="text-gray-300 text-sm tracking-wide">
-        Click to connect real-time API
+        Click to test real-time API
       </p>
     </div>
   );

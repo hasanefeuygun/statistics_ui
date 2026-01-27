@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 type PongPayload = {
   recieved: { msg: string };
@@ -9,6 +10,8 @@ type PongPayload = {
 };
 
 export default function RealtimePage() {
+  const router = useRouter();
+
   const socketRef = useRef<Socket | null>(null); //One reference ,one instance even if component is rendered.
 
   const [hello, setHello] = useState<string>("");
@@ -18,7 +21,7 @@ export default function RealtimePage() {
   const [lastPong, setLastPong] = useState<PongPayload | null>(null);
 
   useEffect(() => {
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/realtime`);
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/testsocket`);
 
     socketRef.current = socket;
 
@@ -29,6 +32,7 @@ export default function RealtimePage() {
 
     socket.on("disconnect", () => {
       setStatus("disconnected");
+      console.log(status);
     });
 
     // Client is listening that server will throw hello event on connection
@@ -69,15 +73,21 @@ export default function RealtimePage() {
 
         <button
           onClick={sendPing}
-          className="mt-4 rounded-xl bg-black px-4 py-2 text-white"
+          className="mt-4 rounded-xl bg-red-500 px-4 py-2 text-white hover:bg-black transition-all duration-200 cursor-pointer active:scale-95"
           disabled={status !== "connected"}
         >
-          Ping gönder
+          Send ping
+        </button>
+        <button
+          className="ml-4 mt-4 rounded-xl bg-gray-700 px-4 py-2 text-white hover:bg-black transition-all duration-200 cursor-pointer active:scale-95"
+          onClick={() => router.back()}
+        >
+          Go back
         </button>
 
         <div className="mt-4">
           <div className="text-sm font-medium">Last pong:</div>
-          <pre className="mt-2 overflow-auto rounded-xl bg-zinc-100 p-3 text-xs">
+          <pre className="mt-2 overflow-auto rounded-xl bg-zinc-100 p-3 text-xs text-black">
             {lastPong ? JSON.stringify(lastPong, null, 2) : "None"}
           </pre>
         </div>
