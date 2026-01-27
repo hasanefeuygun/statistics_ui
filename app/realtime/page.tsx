@@ -1,0 +1,89 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { io, Socket } from "socket.io-client";
+
+type PongPayload = {
+  recieved: { msg: string };
+  at: number;
+};
+
+export default function RealtimePage() {
+  const socketRef = useRef<Socket | null>(null); //One reference ,one instance even if component is rendered.
+
+  const [hello, setHello] = useState<string>("");
+  const [status, setStatus] = useState<"connected" | "disconnected">(
+    "disconnected",
+  );
+  const [lastPong, setLastPong] = useState<PongPayload | null>(null);
+
+  useEffect(() => {
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/realtime`, {
+      transports: ["websocket"],
+    });
+
+    socketRef.current = socket;
+
+    //Listening events
+    socket.on("connect", () => {
+      setStatus("connected");
+    });
+
+    socket.on("disconnect", () => {
+      setStatus("disconnected");
+    });
+
+    // Client is listening that server will throw hello event on connection
+    socket.on("server:hello", (data: { msg: string }) => {
+      setHello(data.msg);
+    });
+
+    socket.on("server:pong", (data: PongPayload) => {
+      setLastPong(data);
+    });
+
+    //Clean up effects while closing page.(like closing socket for pretend data leak)
+    return () => {
+      socket.disconnect();
+      socketRef.current = null; //Close ref
+    };
+  }, []);
+
+  const sendPing = () => {
+    socketRef.current?.emit("client:ping", { msg: "ping from UI" });
+  };
+
+  return (
+    <div className="mx-auto max-w-xl p-6">
+      <div className="rounded-2xl border p-5 shadow-sm">
+        <h1 className="text-xl font-semibold">Realtime Test</h1>
+
+        <div className="mt-3 text-sm">
+          <div>
+            <span className="font-medium">Status:</span> {status}
+          </div>
+
+          <div className="mt-1">
+            <span className="font-medium">Hello:</span>{" "}
+            {hello ? hello : "(henüz gelmedi)"}
+          </div>
+        </div>
+
+        <button
+          onClick={sendPing}
+          className="mt-4 rounded-xl bg-black px-4 py-2 text-white"
+          disabled={status !== "connected"}
+        >
+          Ping gönder
+        </button>
+
+        <div className="mt-4">
+          <div className="text-sm font-medium">Last pong:</div>
+          <pre className="mt-2 overflow-auto rounded-xl bg-zinc-100 p-3 text-xs">
+            {lastPong ? JSON.stringify(lastPong, null, 2) : "Yok"}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
