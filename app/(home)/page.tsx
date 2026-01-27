@@ -4,7 +4,6 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
-      {/* subtle background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-130 w-130 -translate-x-1/2 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute top-48 -right-45 h-105 w-105 rounded-full bg-white/5 blur-3xl" />
@@ -12,7 +11,6 @@ export default function HomePage() {
       </div>
 
       <div className="relative mx-auto flex max-w-6xl flex-col px-6 py-14 md:py-20">
-        {/* Badge */}
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
@@ -21,7 +19,6 @@ export default function HomePage() {
           LIVE • WebSocket Streaming
         </div>
 
-        {/* Hero */}
         <div className="mt-10 grid gap-10 md:mt-12 md:grid-cols-2 md:items-center">
           <div>
             <h1 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
@@ -37,7 +34,6 @@ export default function HomePage() {
               Track trends without refreshing the page.
             </p>
 
-            {/* CTAs */}
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/chart"
@@ -54,13 +50,11 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* tiny info line */}
             <div className="mt-6 text-xs text-zinc-400">
               Latency-aware • Stream-first • Dashboard-ready
             </div>
           </div>
 
-          {/* Right side “preview” card */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
             <div className="flex items-center justify-between">
               <div className="text-sm font-semibold text-zinc-100">
@@ -120,7 +114,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Feature cards */}
         <section className="mt-12 grid gap-4 md:mt-16 md:grid-cols-3">
           <FeatureCard
             title="Real-time Updates"
@@ -136,7 +129,6 @@ export default function HomePage() {
           />
         </section>
 
-        {/* Footer */}
         <footer className="mt-14 border-t border-white/10 pt-6 text-xs text-zinc-500">
           © {new Date().getFullYear()} Statistics • Built for streaming metrics.
         </footer>
