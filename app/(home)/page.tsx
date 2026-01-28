@@ -1,7 +1,41 @@
-// app/(home)/page.tsx
+"use client";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { io, Socket } from "socket.io-client";
+
+type NumbersTickPayload = {
+  value: number;
+  at: number;
+};
 
 export default function HomePage() {
+  const [connectionState, setConnectionState] = useState<
+    "connected" | "disconnected" | "connecting"
+  >("disconnected");
+
+  const [lastUpdate, setlastUpdate] = useState<number | null>(null);
+
+  const socketRef = useRef<Socket | null>(null);
+  useEffect(() => {
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`);
+
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setConnectionState("connected");
+    });
+
+    socket.on("disconnect", () => {
+      setConnectionState("disconnected");
+    });
+
+    socket.on("server:stats", (data: NumbersTickPayload) => {
+      const { value, at } = data;
+      const arrivalTime = new Date(at).getMilliseconds();
+      setlastUpdate(new Date().getMilliseconds() - arrivalTime);
+    });
+  });
+
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -13,10 +47,29 @@ export default function HomePage() {
       <div className="relative mx-auto flex max-w-6xl flex-col px-6 py-14 md:py-20">
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            {connectionState !== "disconnected" && (
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full opacity-40 ${
+                  connectionState === "connected"
+                    ? "bg-emerald-400 animate-ping"
+                    : "bg-yellow-400 animate-ping"
+                }`}
+              />
+            )}
+
+            <span
+              className={`relative inline-flex h-2 w-2 rounded-full ${
+                connectionState === "connected"
+                  ? "bg-emerald-400"
+                  : connectionState === "connecting"
+                    ? "bg-yellow-400"
+                    : "bg-red-500"
+              }`}
+            />
           </span>
-          LIVE • WebSocket Streaming
+          {connectionState === "connected" && "LIVE • WebSocket Streaming"}
+          {connectionState === "connecting" && "CONNECTING • WebSocket"}
+          {connectionState === "disconnected" && "OFFLINE • No Connection"}
         </div>
 
         <div className="mt-10 grid gap-10 md:mt-12 md:grid-cols-2 md:items-center">
@@ -68,13 +121,13 @@ export default function HomePage() {
             <div className="mt-4 grid gap-3">
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Current Rate</div>
-                <div className="mt-1 text-2xl font-semibold">~ 12.4/s</div>
+                <div className="mt-1 text-2xl font-semibold">{`~${lastUpdate !== null ? Math.floor(1000 / lastUpdate) : "..."}/s`}</div>
               </div>
 
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Last Update</div>
                 <div className="mt-1 text-sm font-medium text-zinc-200">
-                  just now
+                  {`${lastUpdate} milliseconds`}
                 </div>
               </div>
 
