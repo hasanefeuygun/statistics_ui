@@ -8,16 +8,28 @@ type NumbersTickPayload = {
   at: number;
 };
 
+type SubscribePayload = {
+  isSubscribed: boolean;
+  subscriberCount: number;
+};
+
 export default function HomePage() {
   const [connectionState, setConnectionState] = useState<
     "connected" | "disconnected" | "connecting"
   >("disconnected");
 
+  const [dataFlowState, setDataFlowState] = useState<"stopped" | "started">(
+    "stopped",
+  );
+
   const [lastUpdate, setlastUpdate] = useState<number | null>(null);
 
   const socketRef = useRef<Socket | null>(null);
+
   useEffect(() => {
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`);
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`, {
+      reconnectionAttempts: 5,
+    });
 
     socketRef.current = socket;
 
@@ -34,7 +46,35 @@ export default function HomePage() {
       const arrivalTime = new Date(at).getMilliseconds();
       setlastUpdate(new Date().getMilliseconds() - arrivalTime);
     });
-  });
+
+    socket.on("server:subscribed", (data: SubscribePayload) => {
+      const { isSubscribed, subscriberCount } = data;
+      console.log(isSubscribed, subscriberCount);
+    });
+
+    socket.on("server:unsubscribed", (data: SubscribePayload) => {
+      const { isSubscribed, subscriberCount } = data;
+      console.log(isSubscribed, subscriberCount);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("server:stats");
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleDataFlow = () => {
+    if (dataFlowState === "stopped") {
+      socketRef.current?.emit("subscribe");
+      setDataFlowState("started");
+    }
+    if (dataFlowState === "started") {
+      socketRef.current?.emit("unsubscribe");
+      setDataFlowState("stopped");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
@@ -95,12 +135,12 @@ export default function HomePage() {
                 Go to Live Chart
               </Link>
 
-              <Link
-                href="/test"
-                className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
+              <button
+                className="inline-flex items-center cursor-pointer justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
+                onClick={handleDataFlow}
               >
-                Test Connection
-              </Link>
+                {`${dataFlowState === "started" ? "Stop" : "Start"} Data Flow`}
+              </button>
             </div>
 
             <div className="mt-6 text-xs text-zinc-400">
@@ -114,7 +154,7 @@ export default function HomePage() {
                 Live Feed Overview
               </div>
               <div className="rounded-full border border-white/10 bg-black/30 px-2 py-1 text-[11px] text-zinc-300">
-                ws:// connected
+                {`ws:// ${connectionState}`}
               </div>
             </div>
 
@@ -127,7 +167,7 @@ export default function HomePage() {
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Last Update</div>
                 <div className="mt-1 text-sm font-medium text-zinc-200">
-                  {`${lastUpdate} milliseconds`}
+                  {`${lastUpdate !== null ? lastUpdate : "..."} milliseconds`}
                 </div>
               </div>
 
