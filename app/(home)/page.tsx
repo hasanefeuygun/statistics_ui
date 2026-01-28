@@ -1,77 +1,34 @@
 "use client";
+import { useSocket, useStats } from "@/providers/SocketProvider";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-type NumbersTickPayload = {
-  value: number;
-  at: number;
-};
+// type NumbersTickPayload = {
+//   value: number;
+//   at: number;
+// };
 
-type SubscribePayload = {
-  isSubscribed: boolean;
-  subscriberCount: number;
-};
+// type SubscribePayload = {
+//   isSubscribed: boolean;
+//   subscriberCount: number;
+// };
 
 export default function HomePage() {
-  const [connectionState, setConnectionState] = useState<
-    "connected" | "disconnected" | "connecting"
-  >("disconnected");
-
-  const [dataFlowState, setDataFlowState] = useState<"stopped" | "started">(
+  const [dataFlowState, setDataFlowState] = useState<"started" | "stopped">(
     "stopped",
   );
 
-  const [lastUpdate, setlastUpdate] = useState<number | null>(null);
-
-  const socketRef = useRef<Socket | null>(null);
-
-  useEffect(() => {
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`, {
-      reconnectionAttempts: 5,
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      setConnectionState("connected");
-    });
-
-    socket.on("disconnect", () => {
-      setConnectionState("disconnected");
-    });
-
-    socket.on("server:stats", (data: NumbersTickPayload) => {
-      const { value, at } = data;
-      const arrivalTime = new Date(at).getMilliseconds();
-      setlastUpdate(new Date().getMilliseconds() - arrivalTime);
-    });
-
-    socket.on("server:subscribed", (data: SubscribePayload) => {
-      const { isSubscribed, subscriberCount } = data;
-      console.log(isSubscribed, subscriberCount);
-    });
-
-    socket.on("server:unsubscribed", (data: SubscribePayload) => {
-      const { isSubscribed, subscriberCount } = data;
-      console.log(isSubscribed, subscriberCount);
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("server:stats");
-      socket.disconnect();
-    };
-  }, []);
+  const { connectionState, startFlow, stopFlow } = useSocket();
+  const { lastUpdate } = useStats();
 
   const handleDataFlow = () => {
     if (dataFlowState === "stopped") {
-      socketRef.current?.emit("subscribe");
+      startFlow();
       setDataFlowState("started");
     }
     if (dataFlowState === "started") {
-      socketRef.current?.emit("unsubscribe");
+      stopFlow();
       setDataFlowState("stopped");
     }
   };
@@ -161,13 +118,19 @@ export default function HomePage() {
             <div className="mt-4 grid gap-3">
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Current Rate</div>
-                <div className="mt-1 text-2xl font-semibold">{`~${lastUpdate !== null ? Math.floor(1000 / lastUpdate) : "..."}/s`}</div>
+                <div className="mt-1 text-2xl font-semibold">
+                  {dataFlowState === "started"
+                    ? `~${lastUpdate !== null ? Math.floor(1000 / lastUpdate) : "..."}/s`
+                    : 'Click "Start Data Flow" to see'}
+                </div>
               </div>
 
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Last Update</div>
                 <div className="mt-1 text-sm font-medium text-zinc-200">
-                  {`${lastUpdate !== null ? lastUpdate : "..."} milliseconds`}
+                  {dataFlowState === "started"
+                    ? `${lastUpdate !== null ? lastUpdate : "..."} milliseconds`
+                    : 'Click "Start Data Flow" to see'}
                 </div>
               </div>
 
