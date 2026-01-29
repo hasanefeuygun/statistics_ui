@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart,
@@ -25,6 +26,8 @@ type NumbersTickPayload = {
 // Temporary placeholder data
 
 export default function RateChartCard() {
+  const router = useRouter();
+
   const socketRef = useRef<Socket | null>(null);
 
   const [connectionState, setConnectionState] = useState<
@@ -81,6 +84,13 @@ export default function RateChartCard() {
 
   return (
     <section className="h-full rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+      <button
+        onClick={() => router.back()}
+        className="mb-2 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:bg-white/10 active:scale-[0.98]"
+      >
+        <span className="text-base">←</span>
+        Back
+      </button>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-xs font-medium text-zinc-400">
