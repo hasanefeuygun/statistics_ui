@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Statistics UI
 
-## Getting Started
+NextJs UI based on WebSocket(via Socket.io Library)for Statistics Project
 
-First, run the development server:
+‼️**This frontend must run together with Statistics Backend(NestJs API).Repo name -> statistics_backend.**
+
+## 📦 Installation
+
+```bash
+npm install
+```
+
+---
+
+## 🔐 Environment Variables (Required)
+
+### Create `.env` (or `.env.local`)
+
+Create **one** of these files in the frontend root folder, take a look at `.env.example`:
+
+- `.env` OR `.env.local`
+
+Put this inside:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:{Choose Port}
+```
+
+## ▶️ Run Frontend
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Frontend will be available at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔗 Backend Connection
 
-To learn more about Next.js, take a look at the following resources:
+WebSocket namespace is
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `NEXT_PUBLIC_API_URL/`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Example:
 
-## Deploy on Vercel
+- http://localhost:8080
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A WebSocket connection is initialized when the frontend application boots.So make sure the backend is running first.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🔌 WebSocket Connection Lifecycle
+
+The WebSocket connection is managed using `useEffect` and is tightly coupled to the lifecycle of each page.
+
+### 🏠 Home Page
+
+- When the Home page is mounted, a WebSocket connection is established.
+- The connection is created inside a `useEffect` hook.
+- A cleanup function checks whether the component is unmounted.
+- If the component is unmounted, the WebSocket connection is gracefully closed.
+
+This ensures that the connection only exists while the Home page is active.
+
+### 📊 Chart Page
+
+- The same lifecycle logic applies to the Chart page.
+- When navigating from Home to Chart:
+  - The WebSocket connection created on the Home page is closed.
+  - A new WebSocket connection is established on the Chart page.
+- All of these operations are controlled via `useEffect` hooks and their cleanup functions.
+
+### ✅ Result
+
+- Only one active WebSocket connection exists at any given time.
+- Connections are created and destroyed based on page lifecycle.
+- Prevents duplicate connections and unnecessary resource usage.
+- Ensures predictable and maintainable real-time data flow.
+
+## 🔄 Real-Time Data Flow Control
+
+The frontend is connected to an API that contains a service responsible for generating a random number every 5 seconds.
+
+### 🎛 Start / Stop Data Flow (Home Page)
+
+- The Home page contains a **Start Data Flow** and **Stop Data Flow** button.
+- These buttons control whether the backend service should actively generate data.
+
+### 🔁 How It Works
+
+- When **Start Data Flow** is clicked:
+  - The frontend sends a `subscribe` event to the API's Event Gateway.
+  - The backend service begins generating a random number every 5 seconds.
+  - Generated numbers are streamed to the frontend through WebSocket.
+
+- When **Stop Data Flow** is clicked:
+  - The frontend sends an `unsubscribe` event to the API's Event Gateway.
+  - The backend service stops generating numbers.
+  - No further data is pushed to the client.
+
+### ✅ Result
+
+- Data production is fully controlled from the frontend.
+- The backend only produces data when at least one client explicitly subscribes.
+- Prevents unnecessary background processing.
+- Keeps the real-time pipeline efficient and event-driven.
+
+## 🛠 Tech Stack
+
+- Next.js
+- TypeScript
+- Socket.io-client
+- Tailwind CSS
+- Chart Library (Recharts / Chart.js / etc.)
+
+## 🧱 Architecture
+
+```
+Frontend (Next.js)
+|
+| WebSocket
+|
+Backend (NestJS Gateway)
+|
+| Event
+|
+Random Number Service
+```
