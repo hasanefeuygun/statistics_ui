@@ -14,8 +14,8 @@ import {
 import { io, Socket } from "socket.io-client";
 
 type RateRow = {
-  number: number; // 1..10
-  rate: number; // percentage
+  number: number;
+  rate: number;
 };
 
 type NumbersTickPayload = {
@@ -23,7 +23,7 @@ type NumbersTickPayload = {
   at: number;
 };
 
-// Temporary placeholder data
+//
 
 export default function RateChartCard() {
   const router = useRouter();

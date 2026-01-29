@@ -6,7 +6,6 @@ export default function ChartPage() {
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-10">
-        {/* Intro / Explanation */}
         <header className="mb-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-200">
             Real-time • WebSocket stream
@@ -25,18 +24,12 @@ export default function ChartPage() {
           </p>
         </header>
 
-        {/* Fill the remaining space */}
         <div className="flex-1">
-          {/* Buraya senin chart section component’in gelecek */}
-          {/* <FrequencyChartCard /> */}
-
-          {/* Eğer kartın boyu küçük kalıyorsa, wrapper’a tam yükseklik ver: */}
           <div className="h-full">
             <RateChartCard />
           </div>
         </div>
 
-        {/* Optional footer (isteğe bağlı) */}
         <footer className="mt-6 text-xs text-zinc-500">
           Tip: Use <span className="text-zinc-200">Start Data Flow</span> to
           begin streaming and watch the bars update instantly.

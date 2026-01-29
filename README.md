@@ -52,6 +52,12 @@ A WebSocket connection is initialized when the frontend application boots.So mak
 
 ---
 
+### 📊 Statistics Chart
+
+- Displays the **percentage distribution** of incoming random numbers.
+- Each bar represents how often a specific number appears relative to the total count.
+- Updates in real-time as new data arrives through WebSocket.
+
 ## 🔌 WebSocket Connection Lifecycle
 
 The WebSocket connection is managed using `useEffect` and is tightly coupled to the lifecycle of each page.
