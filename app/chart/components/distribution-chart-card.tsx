@@ -1,7 +1,6 @@
 "use client";
 
-import { useStats } from "@/providers/SocketProvider";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -11,23 +10,74 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { io, Socket } from "socket.io-client";
 
 type RateRow = {
   number: number; // 1..10
   rate: number; // percentage
 };
 
+type NumbersTickPayload = {
+  value: number;
+  at: number;
+};
+
 // Temporary placeholder data
 
 export default function RateChartCard() {
-  const { statsValue } = useStats();
+  const socketRef = useRef<Socket | null>(null);
 
-  const loading = statsValue === null;
+  const [connectionState, setConnectionState] = useState<
+    "connected" | "disconnected"
+  >("disconnected");
+  const [statsHistory, setStatsHistory] = useState<number[]>([]);
 
-  const data: RateRow[] | null = Array.from({ length: 10 }, (_, i) => ({
-    number: i + 1,
-    rate: 0,
-  }));
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_API_URL, {
+      reconnectionAttempts: 5,
+    });
+
+    socketRef.current = socket;
+
+    const onConnect = () => setConnectionState("connected");
+    const onDisconnect = () => setConnectionState("disconnected");
+    const onStats = (data: NumbersTickPayload) => {
+      setStatsHistory((prev) => [...prev, data.value]);
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("server:stats", onStats);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("server:stats", onStats);
+      socket.disconnect();
+    };
+  }, []);
+
+  const data: RateRow[] = useMemo(() => {
+    if (statsHistory.length === 0) {
+      return Array.from({ length: 10 }, (_, i) => ({
+        number: i + 1,
+        rate: 0,
+      }));
+    }
+
+    const total = statsHistory.length;
+
+    return Array.from({ length: 10 }, (_, i) => {
+      const n = i + 1;
+
+      const count = statsHistory.filter((v) => v === n).length;
+
+      return {
+        number: n,
+        rate: (count / total) * 100,
+      };
+    });
+  }, [statsHistory]);
 
   return (
     <section className="h-full rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
@@ -68,6 +118,7 @@ export default function RateChartCard() {
               <YAxis tick={{ fill: "rgba(244,244,245,0.8)" }} unit="%" />
 
               <Tooltip
+                cursor={false}
                 formatter={(value) => [`${value}%`, "Rate"]}
                 contentStyle={{
                   background: "rgba(10,10,14,0.95)",
@@ -77,7 +128,12 @@ export default function RateChartCard() {
                 }}
               />
 
-              <Bar dataKey="rate" radius={[10, 10, 0, 0]} />
+              <Bar
+                dataKey="rate"
+                radius={[10, 10, 0, 0]}
+                fill="rgba(99,102,241,0.85)"
+                activeBar={false}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

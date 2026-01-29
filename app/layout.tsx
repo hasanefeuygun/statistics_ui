@@ -1,7 +1,5 @@
 import "./globals.css";
 
-import { SocketProvider } from "@/providers/SocketProvider";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -9,9 +7,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-[#0B0B0F] text-zinc-100">
-        <SocketProvider>{children}</SocketProvider>
-      </body>
+      <body className="bg-[#0B0B0F] text-zinc-100">{children}</body>
     </html>
   );
 }

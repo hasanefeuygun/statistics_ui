@@ -1,34 +1,56 @@
 "use client";
-import { useSocket, useStats } from "@/providers/SocketProvider";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-// type NumbersTickPayload = {
-//   value: number;
-//   at: number;
-// };
-
-// type SubscribePayload = {
-//   isSubscribed: boolean;
-//   subscriberCount: number;
-// };
+type NumbersTickPayload = {
+  value: number;
+  at: number;
+};
 
 export default function HomePage() {
   const [dataFlowState, setDataFlowState] = useState<"started" | "stopped">(
     "stopped",
   );
+  const [connectionState, setConnectionState] = useState<
+    "connecting" | "connected" | "disconnected"
+  >("disconnected");
+  const [lastUpdate, setlastUpdate] = useState<number | null>(null);
 
-  const { connectionState, startFlow, stopFlow } = useSocket();
-  const { lastUpdate } = useStats();
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_API_URL, {
+      reconnectionAttempts: 5,
+    });
+
+    socketRef.current = socket;
+
+    const onConnect = () => setConnectionState("connected");
+    const onDisconnect = () => setConnectionState("disconnected");
+    const onStats = (data: NumbersTickPayload) =>
+      setlastUpdate(Date.now() - new Date(data.at).getTime());
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("server:stats", onStats);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("server:stats", onStats);
+      socket.disconnect();
+    };
+  }, []);
 
   const handleDataFlow = () => {
     if (dataFlowState === "stopped") {
-      startFlow();
+      socketRef.current?.emit("subscribe");
       setDataFlowState("started");
     }
     if (dataFlowState === "started") {
-      stopFlow();
+      socketRef.current?.emit("unsubscribe");
       setDataFlowState("stopped");
     }
   };
