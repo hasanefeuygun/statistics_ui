@@ -51,7 +51,7 @@ export default function SocketProvider({
 
     socket.on("server:stats", (data: ServerStatsPayload) => {
       setlastUpdate(Date.now() - new Date(data.at).getTime());
-      setStatsHistory((prev) => [...prev, data.value]);
+      setStatsHistory((prev) => [...prev, data.value].slice(-1000));
     });
   }, []);
 
