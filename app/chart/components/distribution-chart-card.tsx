@@ -1,7 +1,8 @@
 "use client";
 
+import { SocketContext } from "@/app/contexts/Socket.Context";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -11,16 +12,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { io, Socket } from "socket.io-client";
 
 type RateRow = {
   number: number;
   rate: number;
-};
-
-type NumbersTickPayload = {
-  value: number;
-  at: number;
 };
 
 //
@@ -28,38 +23,11 @@ type NumbersTickPayload = {
 export default function RateChartCard() {
   const router = useRouter();
 
-  const socketRef = useRef<Socket | null>(null);
+  const context = useContext(SocketContext);
+  if (!context)
+    throw new Error("SocketContext must be used inside SocketProvider");
 
-  const [connectionState, setConnectionState] = useState<
-    "connected" | "disconnected"
-  >("disconnected");
-  const [statsHistory, setStatsHistory] = useState<number[]>([]);
-
-  useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL, {
-      reconnectionAttempts: 5,
-    });
-
-    socketRef.current = socket;
-
-    const onConnect = () => setConnectionState("connected");
-    const onDisconnect = () => setConnectionState("disconnected");
-    const onStats = (data: NumbersTickPayload) => {
-      setStatsHistory((prev) => [...prev, data.value]);
-    };
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("server:stats", onStats);
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("server:stats", onStats);
-      socket.disconnect();
-    };
-  }, []);
-
+  const { statsHistory } = context;
   const data: RateRow[] = useMemo(() => {
     if (statsHistory.length === 0) {
       return Array.from({ length: 10 }, (_, i) => ({

@@ -1,4 +1,5 @@
 import "./globals.css";
+import SocketProvider from "./contexts/Socket.Context";
 
 export default function RootLayout({
   children,
@@ -7,7 +8,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-[#0B0B0F] text-zinc-100">{children}</body>
+      <body className="bg-[#0B0B0F] text-zinc-100">
+        <SocketProvider>{children}</SocketProvider>
+      </body>
     </html>
   );
 }

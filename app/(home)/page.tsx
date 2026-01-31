@@ -1,60 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-
-type NumbersTickPayload = {
-  value: number;
-  at: number;
-};
+import SocketProvider from "../contexts/Socket.Context";
+import { SocketContext } from "../contexts/Socket.Context";
 
 export default function HomePage() {
-  const [dataFlowState, setDataFlowState] = useState<"started" | "stopped">(
-    "stopped",
-  );
-  const [connectionState, setConnectionState] = useState<
-    "connecting" | "connected" | "disconnected"
-  >("disconnected");
-  const [lastUpdate, setlastUpdate] = useState<number | null>(null);
+  const context = useContext(SocketContext);
+  if (!context)
+    throw new Error("SocketContext must be used inside SocketProvider");
 
-  const socketRef = useRef<Socket | null>(null);
-
-  useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL, {
-      reconnectionAttempts: 5,
-    });
-
-    socketRef.current = socket;
-
-    const onConnect = () => setConnectionState("connected");
-    const onDisconnect = () => setConnectionState("disconnected");
-    const onStats = (data: NumbersTickPayload) =>
-      setlastUpdate(Date.now() - new Date(data.at).getTime());
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("server:stats", onStats);
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("server:stats", onStats);
-      socket.disconnect();
-    };
-  }, []);
-
-  const handleDataFlow = () => {
-    if (dataFlowState === "stopped") {
-      socketRef.current?.emit("subscribe");
-      setDataFlowState("started");
-    }
-    if (dataFlowState === "started") {
-      socketRef.current?.emit("unsubscribe");
-      setDataFlowState("stopped");
-    }
-  };
-
+  const { connectionState, handleDataFlow, dataFlowState, lastUpdate } =
+    context;
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
