@@ -18,6 +18,7 @@ interface SocketContextType {
   connectionState: ConnectionStatusType;
   lastUpdate: number | null;
   handleDataFlow: () => void;
+  connectionErrorMessage: string | null;
 }
 
 export const SocketContext = createContext<SocketContextType | null>(null);
@@ -38,6 +39,10 @@ export default function SocketProvider({
 
   const socketRef = useRef<Socket | null>(null);
 
+  const [connectionErrorMessage, setConnectionErrorMessage] = useState<
+    string | null
+  >(null);
+
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_API_URL, {
       reconnectionAttempts: 5,
@@ -53,6 +58,14 @@ export default function SocketProvider({
       setlastUpdate(Date.now() - new Date(data.at).getTime());
       setStatsHistory((prev) => [...prev, data.value].slice(-1000));
     });
+
+    socket.on("connect_error", (error) =>
+      setConnectionErrorMessage(
+        error.message === "xhr poll error"
+          ? "Are you sure backend file is running?"
+          : error.message,
+      ),
+    );
   }, []);
 
   const handleDataFlow = () => {
@@ -73,6 +86,7 @@ export default function SocketProvider({
         connectionState,
         lastUpdate,
         handleDataFlow,
+        connectionErrorMessage,
       }}
     >
       {children}

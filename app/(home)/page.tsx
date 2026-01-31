@@ -11,8 +11,13 @@ export default function HomePage() {
   if (!context)
     throw new Error("SocketContext must be used inside SocketProvider");
 
-  const { connectionState, handleDataFlow, dataFlowState, lastUpdate } =
-    context;
+  const {
+    connectionState,
+    handleDataFlow,
+    dataFlowState,
+    lastUpdate,
+    connectionErrorMessage,
+  } = context;
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -78,6 +83,29 @@ export default function HomePage() {
               >
                 {`${dataFlowState === "started" ? "Stop" : "Start"} Data Flow`}
               </button>
+
+              {connectionErrorMessage && (
+                <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 backdrop-blur-sm">
+                  <div className="flex items-start gap-3">
+                    {/* Sol ikon */}
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/20">
+                      <span className="text-red-400 text-lg">⚠️</span>
+                    </div>
+
+                    {/* Sağ içerik */}
+                    <div className="flex-1">
+                      {/* Başlık */}
+                      <p className="text-sm font-semibold text-red-200">
+                        Connection Error
+                      </p>
+
+                      <p className="mt-1 text-sm text-zinc-200/80">
+                        {connectionErrorMessage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="mt-6 text-xs text-zinc-400">
