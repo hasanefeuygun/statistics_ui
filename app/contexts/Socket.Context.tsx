@@ -32,9 +32,8 @@ export default function SocketProvider({
   const [dataFlowState, setDataFlowState] =
     useState<DataFlowStateType>("stopped");
 
-  const [connectionState, setConnectionState] = useState<
-    "connecting" | "connected" | "disconnected"
-  >("disconnected");
+  const [connectionState, setConnectionState] =
+    useState<ConnectionStatusType>("connecting");
 
   const [lastUpdate, setlastUpdate] = useState<number | null>(null);
 
@@ -46,6 +45,8 @@ export default function SocketProvider({
 
   const [statsLoading, setStatsLoading] = useState<boolean>(true);
 
+  const AmIConnectedBefore = useRef<boolean>(false);
+
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_API_URL, {
       reconnectionAttempts: 5,
@@ -55,6 +56,7 @@ export default function SocketProvider({
 
     socket.on("server:connection", (data: ServerConnectionPayload) => {
       setConnectionState(data.connectionStatus);
+      if (connectionState === "connected") AmIConnectedBefore.current = true;
     });
 
     socket.on("server:stats", (data: ServerStatsPayload) => {
@@ -63,13 +65,16 @@ export default function SocketProvider({
       setStatsLoading(false);
     });
 
-    socket.on("connect_error", (error) =>
+    socket.on("connect_error", (error) => {
+      if (AmIConnectedBefore.current) {
+        setConnectionErrorMessage("Trying to reconnect");
+      }
       setConnectionErrorMessage(
         error.message === "xhr poll error"
           ? "Are you sure backend file is running?"
           : error.message,
-      ),
-    );
+      );
+    });
   }, []);
 
   const handleDataFlow = () => {
