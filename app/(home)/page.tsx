@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useContext, useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import SocketProvider from "../contexts/Socket.Context";
+import { useContext } from "react";
+
 import { SocketContext } from "../contexts/Socket.Context";
 
 export default function HomePage() {
@@ -17,6 +16,7 @@ export default function HomePage() {
     dataFlowState,
     lastUpdate,
     connectionErrorMessage,
+    statsLoading,
   } = context;
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-zinc-100">
@@ -128,7 +128,11 @@ export default function HomePage() {
                 <div className="text-xs text-zinc-400">Current Rate</div>
                 <div className="mt-1 text-2xl font-semibold">
                   {dataFlowState === "started"
-                    ? `~${lastUpdate !== null ? Math.floor(1000 / lastUpdate) : "..."}/s`
+                    ? `~${
+                        statsLoading || lastUpdate === null
+                          ? "Loading..."
+                          : Math.floor(1000 / lastUpdate)
+                      }/s`
                     : 'Click "Start Data Flow" to see'}
                 </div>
               </div>

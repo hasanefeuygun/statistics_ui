@@ -19,6 +19,7 @@ interface SocketContextType {
   lastUpdate: number | null;
   handleDataFlow: () => void;
   connectionErrorMessage: string | null;
+  statsLoading: boolean;
 }
 
 export const SocketContext = createContext<SocketContextType | null>(null);
@@ -43,6 +44,8 @@ export default function SocketProvider({
     string | null
   >(null);
 
+  const [statsLoading, setStatsLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_API_URL, {
       reconnectionAttempts: 5,
@@ -57,6 +60,7 @@ export default function SocketProvider({
     socket.on("server:stats", (data: ServerStatsPayload) => {
       setlastUpdate(Date.now() - new Date(data.at).getTime());
       setStatsHistory((prev) => [...prev, data.value].slice(-1000));
+      setStatsLoading(false);
     });
 
     socket.on("connect_error", (error) =>
@@ -81,6 +85,7 @@ export default function SocketProvider({
   return (
     <SocketContext.Provider
       value={{
+        statsLoading,
         statsHistory,
         dataFlowState,
         connectionState,
