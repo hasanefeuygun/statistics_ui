@@ -13,6 +13,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
+const NUMBER_RANGE = 10; // how many of {number,stats} pair that ui expects
+
 type RateRow = {
   number: number;
   rate: number;
@@ -30,7 +32,7 @@ export default function RateChartCard() {
   const { statsHistory } = context;
   const data: RateRow[] = useMemo(() => {
     if (statsHistory.length === 0) {
-      return Array.from({ length: 10 }, (_, i) => ({
+      return Array.from({ length: NUMBER_RANGE }, (_, i) => ({
         number: i + 1,
         rate: 0,
       }));
@@ -38,7 +40,7 @@ export default function RateChartCard() {
 
     const total = statsHistory.length;
 
-    return Array.from({ length: 10 }, (_, i) => {
+    return Array.from({ length: NUMBER_RANGE }, (_, i) => {
       const n = i + 1;
 
       const count = statsHistory.filter((v) => v === n).length;

@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useContext } from "react";
 
 import { SocketContext } from "../contexts/Socket.Context";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const router = useRouter();
+
   const context = useContext(SocketContext);
   if (!context)
     throw new Error("SocketContext must be used inside SocketProvider");
@@ -70,14 +72,16 @@ export default function HomePage() {
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link
-                href="/chart"
-                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
+              <button
+                aria-label={connectionState}
+                onClick={() => router.push("/chart")}
+                className="inline-flex items-center justify-center cursor-pointer rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
               >
                 Go to Live Chart
-              </Link>
+              </button>
 
               <button
+                aria-label={connectionState}
                 className="inline-flex items-center cursor-pointer justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
                 onClick={handleDataFlow}
               >
