@@ -11,6 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  LineChart,
+  Line,
 } from "recharts";
 
 const NUMBER_RANGE = 10; // how many of {number,stats} pair that ui expects
@@ -84,7 +86,7 @@ export default function RateChartCard() {
       <div className="flex-1 rounded-xl border border-white/10 bg-black/20 p-3">
         <div className="h-90 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+            <LineChart
               data={data}
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
@@ -108,13 +110,18 @@ export default function RateChartCard() {
                 }}
               />
 
-              <Bar
+              <Line
+                type="monotone"
                 dataKey="rate"
-                radius={[10, 10, 0, 0]}
-                fill="rgba(99,102,241,0.85)"
-                activeBar={false}
+                stroke="rgba(99,102,241,0.9)"
+                strokeWidth={2}
+                dot={{
+                  r: 4,
+                  fill: "rgba(99,102,241,0.9)",
+                }}
+                activeDot={{ r: 6 }}
               />
-            </BarChart>
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
