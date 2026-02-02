@@ -4,8 +4,6 @@ import { SocketContext } from "@/app/contexts/Socket.Context";
 import { useRouter } from "next/navigation";
 import { useContext, useMemo } from "react";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,

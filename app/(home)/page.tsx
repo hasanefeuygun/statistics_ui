@@ -4,6 +4,7 @@ import { useContext } from "react";
 
 import { SocketContext } from "../contexts/Socket.Context";
 import { useRouter } from "next/navigation";
+import { Spinner } from "../components/Spinner";
 
 export default function HomePage() {
   const router = useRouter();
@@ -45,7 +46,8 @@ export default function HomePage() {
               className={`relative inline-flex h-2 w-2 rounded-full ${
                 connectionState === "connected"
                   ? "bg-emerald-400"
-                  : connectionState === "connecting"
+                  : connectionState === "connecting" ||
+                      connectionState === "reconnecting"
                     ? "bg-yellow-400"
                     : "bg-red-500"
               }`}
@@ -53,6 +55,7 @@ export default function HomePage() {
           </span>
           {connectionState === "connected" && "LIVE • WebSocket Streaming"}
           {connectionState === "connecting" && "CONNECTING • WebSocket"}
+          {connectionState === "reconnecting" && "RECONNECTING • WebSocket"}
           {connectionState === "disconnected" && "OFFLINE • No Connection"}
         </div>
 
@@ -131,22 +134,33 @@ export default function HomePage() {
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Current Rate</div>
                 <div className="mt-1 text-2xl font-semibold">
-                  {dataFlowState === "started"
-                    ? `~${
-                        statsLoading || lastUpdate === null
-                          ? "Loading..."
-                          : Math.floor(1000 / lastUpdate)
-                      }/s`
-                    : 'Click "Start Data Flow" to see'}
+                  {dataFlowState === "started" ? (
+                    lastUpdate === null || statsLoading ? (
+                      <Spinner />
+                    ) : (
+                      `~${Math.floor(1000 / lastUpdate)}`
+                    )
+                  ) : (
+                    "Click Start Data Flow to see"
+                  )}
                 </div>
               </div>
 
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Last Update</div>
                 <div className="mt-1 text-sm font-medium text-zinc-200">
-                  {dataFlowState === "started"
-                    ? `${lastUpdate !== null ? lastUpdate : "..."} milliseconds`
-                    : 'Click "Start Data Flow" to see'}
+                  {dataFlowState === "started" ? (
+                    lastUpdate === null || statsLoading ? (
+                      <Spinner />
+                    ) : (
+                      <>
+                        {lastUpdate}{" "}
+                        <span className="text-zinc-400">milliseconds</span>
+                      </>
+                    )
+                  ) : (
+                    'Click "Start Data Flow" to see'
+                  )}
                 </div>
               </div>
 
