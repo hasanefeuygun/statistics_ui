@@ -1,17 +1,13 @@
 "use client";
 
-import { useContext } from "react";
-
-import { SocketContext } from "../contexts/Socket.Context";
 import { useRouter } from "next/navigation";
 import { Spinner } from "../components/Spinner";
+import { useSocket } from "@/hooks/useSocket";
 
 export default function HomePage() {
   const router = useRouter();
 
-  const context = useContext(SocketContext);
-  if (!context)
-    throw new Error("SocketContext must be used inside SocketProvider");
+  const context = useSocket();
 
   const {
     connectionState,

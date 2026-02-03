@@ -1,8 +1,8 @@
 "use client";
 
-import { SocketContext } from "@/app/contexts/Socket.Context";
+import { useSocket } from "@/hooks/useSocket";
 import { useRouter } from "next/navigation";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import {
   XAxis,
   YAxis,
@@ -25,9 +25,7 @@ type RateRow = {
 export default function RateChartCard() {
   const router = useRouter();
 
-  const context = useContext(SocketContext);
-  if (!context)
-    throw new Error("SocketContext must be used inside SocketProvider");
+  const context = useSocket();
 
   const { counts, total } = context;
   const data: RateRow[] = useMemo(() => {
