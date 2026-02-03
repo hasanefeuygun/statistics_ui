@@ -150,7 +150,7 @@ export default function HomePage() {
                 <div className="text-xs text-zinc-400">Last Update</div>
                 <div className="mt-1 text-sm font-medium text-zinc-200">
                   {dataFlowState === "started" ? (
-                    lastUpdate === null || statsLoading ? (
+                    lastUpdate === null || lastUpdate === 0 || statsLoading ? (
                       <Spinner />
                     ) : (
                       <>
