@@ -15,7 +15,6 @@ interface ServerStatsPayload {
 }
 
 interface SocketContextType {
-  statsHistory: number[];
   dataFlowState: DataFlowStateType;
   connectionState: ConnectionStatusType;
   lastUpdate: number | null;
@@ -23,16 +22,18 @@ interface SocketContextType {
   connectionErrorMessage: string | null;
   statsLoading: boolean;
   reconnectAttempt: number;
+  total: number;
+  counts: number[];
 }
 
 const RE_CONNECTION_ATTEMPTS = 5;
+const NUMBER_RANGE = 10;
 
 export const SocketContext = createContext<SocketContextType | null>(null);
 
 export default function SocketProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [statsHistory, setStatsHistory] = useState<number[]>([]);
   const [dataFlowState, setDataFlowState] =
     useState<DataFlowStateType>("stopped");
   const [connectionState, setConnectionState] =
@@ -43,8 +44,24 @@ export default function SocketProvider({
   >(null);
   const [statsLoading, setStatsLoading] = useState<boolean>(true);
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
+  const [counts, setCounts] = useState<number[]>(() =>
+    Array(NUMBER_RANGE + 1).fill(0),
+  );
 
   const socketRef = useRef<Socket | null>(null);
+
+  function onNewValue(value: number) {
+    if (value < 1 || value > NUMBER_RANGE) return;
+
+    setCounts((prev) => {
+      const next = [...prev];
+      next[value] += 1;
+      return next;
+    });
+
+    setTotal((t) => t + 1);
+  }
 
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_API_URL, {
@@ -91,8 +108,8 @@ export default function SocketProvider({
     });
 
     socket.on("server:stats", (data: ServerStatsPayload) => {
+      onNewValue(data.value);
       setlastUpdate(Date.now() - new Date(data.at).getTime());
-      setStatsHistory((prev) => [...prev, data.value].slice(-1000));
       setStatsLoading(false);
     });
 
@@ -102,12 +119,6 @@ export default function SocketProvider({
           ? "Cannot reach backend."
           : error.message,
       );
-    });
-
-    socket.on("server:stats", (data: ServerStatsPayload) => {
-      setlastUpdate(Date.now() - new Date(data.at).getTime());
-      setStatsHistory((prev) => [...prev, data.value].slice(-1000));
-      setStatsLoading(false);
     });
 
     return () => {
@@ -132,13 +143,14 @@ export default function SocketProvider({
     <SocketContext.Provider
       value={{
         statsLoading,
-        statsHistory,
         dataFlowState,
         connectionState,
         lastUpdate,
         handleDataFlow,
         connectionErrorMessage,
         reconnectAttempt,
+        total,
+        counts,
       }}
     >
       {children}

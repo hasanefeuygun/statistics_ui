@@ -29,28 +29,18 @@ export default function RateChartCard() {
   if (!context)
     throw new Error("SocketContext must be used inside SocketProvider");
 
-  const { statsHistory } = context;
+  const { counts, total } = context;
   const data: RateRow[] = useMemo(() => {
-    if (statsHistory.length === 0) {
-      return Array.from({ length: NUMBER_RANGE }, (_, i) => ({
-        number: i + 1,
-        rate: 0,
-      }));
-    }
-
-    const total = statsHistory.length;
-
     return Array.from({ length: NUMBER_RANGE }, (_, i) => {
       const n = i + 1;
-
-      const count = statsHistory.filter((v) => v === n).length;
+      const count = counts[n];
 
       return {
         number: n,
-        rate: (count / total) * 100,
+        rate: total === 0 ? 0 : (count / total) * 100,
       };
     });
-  }, [statsHistory]);
+  }, [counts, total]);
 
   return (
     <section className="h-full rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">

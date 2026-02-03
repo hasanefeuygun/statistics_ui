@@ -135,7 +135,7 @@ export default function HomePage() {
                 <div className="text-xs text-zinc-400">Current Rate</div>
                 <div className="mt-1 text-2xl font-semibold">
                   {dataFlowState === "started" ? (
-                    lastUpdate === null || statsLoading ? (
+                    lastUpdate === null || lastUpdate === 0 || statsLoading ? (
                       <Spinner />
                     ) : (
                       `~${Math.floor(1000 / lastUpdate)}`
