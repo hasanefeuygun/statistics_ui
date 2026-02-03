@@ -1,18 +1,23 @@
 "use client";
 import { createContext, useEffect, useRef, useState } from "react";
 import { Socket, io } from "socket.io-client";
+import { z } from "zod";
 
-type DataFlowStateType = "started" | "stopped";
+const RE_CONNECTION_ATTEMPTS = 5;
+const NUMBER_RANGE = 10;
+
 type ConnectionStatusType =
+  | "connecting"
   | "connected"
   | "disconnected"
-  | "connecting"
   | "reconnecting";
 
-interface ServerStatsPayload {
-  value: number;
-  at: number;
-}
+type DataFlowStateType = "started" | "stopped";
+
+const ServerStatsSchema = z.object({
+  value: z.number().int().max(NUMBER_RANGE),
+  at: z.number().int(),
+});
 
 interface SocketContextType {
   dataFlowState: DataFlowStateType;
@@ -25,9 +30,6 @@ interface SocketContextType {
   total: number;
   counts: number[];
 }
-
-const RE_CONNECTION_ATTEMPTS = 5;
-const NUMBER_RANGE = 10;
 
 export const SocketContext = createContext<SocketContextType | null>(null);
 
@@ -107,7 +109,16 @@ export default function SocketProvider({
       setDataFlowState("stopped");
     });
 
-    socket.on("server:stats", (data: ServerStatsPayload) => {
+    socket.on("server:stats", (raw: unknown) => {
+      const parsed = ServerStatsSchema.safeParse(raw);
+
+      if (!parsed.success) {
+        setConnectionErrorMessage("Invalid stats payload recieved from server");
+        return;
+      }
+
+      const data = parsed.data;
+
       onNewValue(data.value);
       setlastUpdate(Date.now() - new Date(data.at).getTime());
       setStatsLoading(false);
