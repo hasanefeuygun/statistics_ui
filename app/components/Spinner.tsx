@@ -1,6 +1,6 @@
 export function Spinner() {
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-2" data-testid="spinner">
       <span
         className="
           w-5 h-5

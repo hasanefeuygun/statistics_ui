@@ -83,6 +83,7 @@ export default function HomePage() {
                 aria-label={connectionState}
                 className="inline-flex items-center cursor-pointer justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
                 onClick={handleDataFlow}
+                data-testid="flow-toggle"
               >
                 {`${dataFlowState === "started" ? "Stop" : "Start"} Data Flow`}
               </button>
@@ -129,7 +130,10 @@ export default function HomePage() {
             <div className="mt-4 grid gap-3">
               <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="text-xs text-zinc-400">Current Rate</div>
-                <div className="mt-1 text-2xl font-semibold">
+                <div
+                  className="mt-1 text-2xl font-semibold"
+                  data-testid="current-rate"
+                >
                   {dataFlowState === "started" ? (
                     lastUpdate === null || lastUpdate === 0 || statsLoading ? (
                       <Spinner />
